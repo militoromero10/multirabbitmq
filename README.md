@@ -1,0 +1,2 @@
+# multirabbitmq
+Pipes and filters
