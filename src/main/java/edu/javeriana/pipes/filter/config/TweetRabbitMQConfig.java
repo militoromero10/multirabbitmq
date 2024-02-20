@@ -1,7 +1,6 @@
 package edu.javeriana.pipes.filter.config;
 
 import edu.javeriana.pipes.filter.utils.Tweet;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +14,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
-@Slf4j
 @Profile("tweets")
 @EnableScheduling
 @Configuration
@@ -26,11 +24,11 @@ public class TweetRabbitMQConfig {
         var queue = new LinkedList<Tweet>();
         try (var in = new BufferedReader(new FileReader("file.in"))) {
             for (String message; (message = in.readLine()) != null; ) {
-                var tweet = Tweet.builder().message(message).build();
+                var tweet = new Tweet(message);
                 queue.push(tweet);
             }
         } catch (IOException e) {
-            log.error(e.getMessage());
+            System.err.println(e.getMessage());
         }
         return queue;
     }

@@ -1,7 +1,6 @@
 package edu.javeriana.pipes.filter.config;
 
 import edu.javeriana.pipes.filter.utils.consumers.TweetConsumer;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
@@ -19,7 +18,6 @@ import org.springframework.context.annotation.Profile;
 
 import java.util.Map;
 
-@Slf4j
 @Profile("tweet-filter")
 @Configuration
 public class TweetFilterRabbitMQConfig {
@@ -42,7 +40,6 @@ public class TweetFilterRabbitMQConfig {
     @Bean
     public ConnectionFactory connectionFactory() {
         var connection = new CachingConnectionFactory();
-        var con = new com.rabbitmq.client.ConnectionFactory();
         connection.setAddresses("localhost:5672");
         connection.setUsername("guest");
         connection.setPassword("guest");
@@ -64,8 +61,8 @@ public class TweetFilterRabbitMQConfig {
     public ConnectionFactory connectionFactoryRouter() {
         var con = new SimpleRoutingConnectionFactory();
         con.setTargetConnectionFactories(Map.of(
-                RabbitMQConfig.TWEETS_QUEUE, connectionFactory(),
-                RabbitMQConfig.FILTER_QUEUE, connectionFactory2()));
+                "pipes.tweets", connectionFactory(),
+                "pipes.filter", connectionFactory2()));
         con.setDefaultTargetConnectionFactory(connectionFactory());
         return con;
     }
@@ -81,7 +78,7 @@ public class TweetFilterRabbitMQConfig {
     @Bean
     public SimpleMessageListenerContainer container(MessageListenerAdapter listenerAdapter) {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory2());
+        container.setConnectionFactory(connectionFactoryRouter());
         container.setQueueNames(RabbitMQConfig.TWEETS_QUEUE);
         container.setMessageListener(listenerAdapter);
         return container;

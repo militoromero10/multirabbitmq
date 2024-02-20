@@ -1,6 +1,6 @@
 package edu.javeriana.pipes.filter.utils;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -11,10 +11,12 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.stream.Stream;
 
-@Slf4j
 @Profile("tweet-generator")
 @Component
 public class MockBoostrap implements CommandLineRunner {
+
+    @Value("${TWEET_SIZE:100}")
+    private Integer size;
 
     @Override
     public void run(String... args) throws Exception {
@@ -23,7 +25,7 @@ public class MockBoostrap implements CommandLineRunner {
 
         try (var writer = new BufferedWriter(new FileWriter("file.in"))) {
             Stream.iterate(0, n -> n + 1)
-                    .limit(100)
+                    .limit(size)
                     .forEach(i -> {
                         try {
                             writer.write(String.format("Tweet %d: text #%s", i, tags[random.nextInt(tags.length)]));
@@ -33,7 +35,7 @@ public class MockBoostrap implements CommandLineRunner {
                         }
                     });
         } catch (IOException e) {
-            log.info(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
