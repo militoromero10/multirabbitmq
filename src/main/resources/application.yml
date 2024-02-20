@@ -8,7 +8,8 @@ spring:
     allow-bean-definition-overriding: true
   profiles:
     active: default
-
+rabbit:
+  host: ${HOST_RABBITMQ_TWEETS:localhost}
 logging:
   level:
     org: ERROR

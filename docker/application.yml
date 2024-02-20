@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_SERVICE:localhost}:3306/tweets_db?serverTimezone=UTC
+    username: root
+    password: prueba123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  main:
+    allow-bean-definition-overriding: true
+  profiles:
+    active: default
+
+rabbit:
+  host: ${HOST_RABBITMQ_TWEETS:localhost}
+logging:
+  level:
+    org: ERROR

@@ -9,6 +9,7 @@ import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -20,6 +21,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "edu.javeriana.pipes.filter.repositories")
 @Configuration
 public class TweetFilteredRabbitMQConfig {
+
+    @Value("${HOST_RABBITMQ_FILTER:localhost}")
+    private String host;
 
     @Bean
     public Queue queue() {
@@ -39,7 +43,7 @@ public class TweetFilteredRabbitMQConfig {
     @Bean
     public ConnectionFactory connectionFactory() {
         var connection = new CachingConnectionFactory();
-        connection.setAddresses("localhost:5673");
+        connection.setAddresses(String.format("%s:5673", host));
         connection.setUsername("guest");
         connection.setPassword("guest");
         return connection;

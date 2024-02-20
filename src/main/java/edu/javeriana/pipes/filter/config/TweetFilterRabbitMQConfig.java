@@ -11,6 +11,7 @@ import org.springframework.amqp.rabbit.connection.SimpleRoutingConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -21,6 +22,13 @@ import java.util.Map;
 @Profile("tweet-filter")
 @Configuration
 public class TweetFilterRabbitMQConfig {
+
+    @Value("${HOST_RABBITMQ_TWEETS:localhost}")
+    private String tweetHost;
+
+    @Value("${HOST_RABBITMQ_FILTER:localhost}")
+    private String filterHost;
+
 
     @Bean
     public Queue queue() {
@@ -40,7 +48,7 @@ public class TweetFilterRabbitMQConfig {
     @Bean
     public ConnectionFactory connectionFactory() {
         var connection = new CachingConnectionFactory();
-        connection.setAddresses("localhost:5672");
+        connection.setAddresses(String.format("%s:5672", tweetHost));
         connection.setUsername("guest");
         connection.setPassword("guest");
         return connection;
@@ -50,7 +58,7 @@ public class TweetFilterRabbitMQConfig {
     public ConnectionFactory connectionFactory2() {
         var connection = new CachingConnectionFactory();
 
-        connection.setAddresses("localhost:5673");
+        connection.setAddresses(String.format("%s:5673", filterHost));
         connection.setUsername("guest");
         connection.setPassword("guest");
         return connection;

@@ -1,0 +1,78 @@
+version: '3.8'
+services:
+  sink:
+    image: mysql:8.0.31
+    container_name: sink
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db/analytics:/var/lib/mysql
+      - ./db/mysql-init:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=prueba123
+    networks:
+      - aes-net
+  rabbitmq-tweets:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-tweets
+    ports:
+      - 15672:15672
+      - 5672:5672
+    hostname: rabbitmq-tweets
+    volumes:
+      - ./rabbitmq-tweets:/var/lib/rabbitmq
+    networks:
+      - aes-net
+  rabbitmq-filter:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-filter
+    ports:
+      - 15673:15672
+      - 5673:5672
+    hostname: rabbitmq-filter
+    volumes:
+      - ./rabbitmq-filter:/var/lib/rabbitmq
+    networks:
+      - aes-net
+  source:
+    image: openjdk:21-jdk
+    container_name: source
+    depends_on:
+      - filter
+    environment:
+      - TWEET_SIZE=500
+      - HOST_RABBITMQ_TWEETS=rabbitmq-tweets
+    volumes:
+      - ./filter.jar:/app/filter.jar
+    command: > 
+      bash -c "java -jar /app/filter.jar --spring.profiles.active=tweet-generator && java -jar /app/filter.jar --spring.profiles.active=tweets"
+    networks:
+      - aes-net
+  filter:
+    image: openjdk:21-jdk
+    container_name: filter
+    depends_on:
+      - store
+    environment:
+      - TAGS=ia,maths,ml
+      - HOST_RABBITMQ_TWEETS=rabbitmq-tweets
+      - HOST_RABBITMQ_FILTER=rabbitmq-filter
+    volumes:
+      - ./filter.jar:/app/filter.jar
+    command: java -jar /app/filter.jar --spring.profiles.active=tweet-filter
+    networks:
+      - aes-net
+  store:
+    image: openjdk:21-jdk
+    container_name: store
+    environment:
+      - DB_SERVICE=sink
+      - HOST_RABBITMQ_FILTER=rabbitmq-filter
+    volumes:
+      - ./filter.jar:/app/filter.jar
+      - ./application.yml:/app/application.yml
+    command: java -jar /app/filter.jar --spring.profiles.active=tweet-filtered
+    networks:
+      - aes-net
+networks:
+  aes-net:
