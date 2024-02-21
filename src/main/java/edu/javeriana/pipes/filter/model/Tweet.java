@@ -18,12 +18,12 @@ public class Tweet {
     private String tag;
 
     @Column(name = "average")
-    private Long average;
+    private Integer average;
 
     public Tweet() {
     }
 
-    public Tweet(Long id, String tweet, String tag, Long average) {
+    public Tweet(Long id, String tweet, String tag, Integer average) {
         this.id = id;
         this.tweet = tweet;
         this.tag = tag;
@@ -54,11 +54,11 @@ public class Tweet {
         this.tag = tag;
     }
 
-    public Long getAverage() {
+    public Integer getAverage() {
         return average;
     }
 
-    public void setAverage(Long average) {
+    public void setAverage(Integer average) {
         this.average = average;
     }
 }
